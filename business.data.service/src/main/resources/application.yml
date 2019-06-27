@@ -1,0 +1,3 @@
+server:
+  context-path: /data
+  port: 8090
