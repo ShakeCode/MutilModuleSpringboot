@@ -1,0 +1,31 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 2
+    }
+  },
+  "mappings": {
+    "properties": {
+      "tags": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "userId": {
+        "type": "keyword"
+      },
+      "location": {
+        "type": "geo_shape"
+      },
+      "planSendTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss"
+      }
+    }
+  }
+}

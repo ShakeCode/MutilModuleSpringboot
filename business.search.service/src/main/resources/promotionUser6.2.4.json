@@ -1,0 +1,25 @@
+{
+  "mappings": {
+    "properties": {
+      "tag": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        },
+        "userid": {
+          "type": "keyword"
+        },
+        "location": {
+          "type": "geo_shape"
+        },
+        "createTime": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        }
+      }
+    }
+  }
+}
