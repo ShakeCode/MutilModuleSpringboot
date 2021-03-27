@@ -59,7 +59,7 @@ public class UserIndexServiceImpl implements UserIndexService {
         //配置文件
         // File jsonFile = ResourceUtils.getFile("classpath:promotionUser.json");
         File jsonFile = ResourceUtils.getFile("classpath:user.json");
-        String json = FileUtils.readFileToString(jsonFile, StandardCharsets.UTF_8);
+        String json = FileUtils.readFileToString(jsonFile, StandardCharsets.UTF_8.name());
         request.source(json, XContentType.JSON);
         // request.mapping(json, XContentType.JSON);
         request.alias(new Alias("user-data"));
