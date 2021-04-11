@@ -1,10 +1,14 @@
 server:
-  servlet:
-    context-path: /search
+  context-path: /search
   port: 8091
+
 
 elasticSearch:
   hostlist: 127.0.0.1:9200
   client:
     connectNum: 10
     connectPerRoute: 50
+
+logging:
+  level:
+    com.search.service.client: debug

@@ -1,0 +1,28 @@
+2021-03-30 00:27:29.329 [ background-preinit ] - [ INFO  ] [ org.hibernate.validator.internal.util.Version : 30 ] - HV000001: Hibernate Validator 5.3.6.Final
+2021-03-30 00:27:32.314 [ restartedMain ] - [ INFO  ] [ com.search.service.Application : 593 ] - No active profile set, falling back to default profiles: default
+2021-03-30 00:27:36.755 [ restartedMain ] - [ INFO  ] [ org.apache.coyote.http11.Http11NioProtocol : 180 ] - Initializing ProtocolHandler ["http-nio-8091"]
+2021-03-30 00:27:36.785 [ restartedMain ] - [ INFO  ] [ org.apache.catalina.core.StandardService : 180 ] - Starting service [Tomcat]
+2021-03-30 00:27:36.786 [ restartedMain ] - [ INFO  ] [ org.apache.catalina.core.StandardEngine : 180 ] - Starting Servlet Engine: Apache Tomcat/8.5.32
+2021-03-30 00:27:37.183 [ localhost-startStop-1 ] - [ INFO  ] [ o.a.c.c.C.[Tomcat].[localhost].[/search] : 180 ] - Initializing Spring embedded WebApplicationContext
+2021-03-30 00:27:39.534 [ restartedMain ] - [ WARN  ] [ com.netflix.config.sources.URLConfigurationSource : 120 ] - No URLs will be polled as dynamic configuration sources.
+2021-03-30 00:27:39.534 [ restartedMain ] - [ INFO  ] [ com.netflix.config.sources.URLConfigurationSource : 121 ] - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2021-03-30 00:27:39.543 [ restartedMain ] - [ WARN  ] [ com.netflix.config.sources.URLConfigurationSource : 120 ] - No URLs will be polled as dynamic configuration sources.
+2021-03-30 00:27:39.543 [ restartedMain ] - [ INFO  ] [ com.netflix.config.sources.URLConfigurationSource : 121 ] - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2021-03-30 00:27:40.576 [ restartedMain ] - [ INFO  ] [ com.search.service.config.WebMvcConfig : 19 ] - 本地图片存储路径：F:/BaiduYunDownload/data/data/img/songListPic/
+2021-03-30 00:27:44.833 [ restartedMain ] - [ INFO  ] [ org.apache.coyote.http11.Http11NioProtocol : 180 ] - Starting ProtocolHandler ["http-nio-8091"]
+2021-03-30 00:27:44.837 [ restartedMain ] - [ INFO  ] [ org.apache.tomcat.util.net.NioSelectorPool : 180 ] - Using a shared selector for servlet write/read
+2021-03-30 00:27:44.879 [ restartedMain ] - [ INFO  ] [ com.search.service.Application : 57 ] - Started Application in 19.431 seconds (JVM running for 24.437)
+2021-03-30 00:29:41.838 [ background-preinit ] - [ INFO  ] [ org.hibernate.validator.internal.util.Version : 30 ] - HV000001: Hibernate Validator 5.3.6.Final
+2021-03-30 00:29:44.855 [ restartedMain ] - [ INFO  ] [ com.search.service.Application : 593 ] - No active profile set, falling back to default profiles: default
+2021-03-30 00:29:48.135 [ restartedMain ] - [ INFO  ] [ org.apache.coyote.http11.Http11NioProtocol : 180 ] - Initializing ProtocolHandler ["http-nio-8091"]
+2021-03-30 00:29:48.151 [ restartedMain ] - [ INFO  ] [ org.apache.catalina.core.StandardService : 180 ] - Starting service [Tomcat]
+2021-03-30 00:29:48.152 [ restartedMain ] - [ INFO  ] [ org.apache.catalina.core.StandardEngine : 180 ] - Starting Servlet Engine: Apache Tomcat/8.5.32
+2021-03-30 00:29:48.384 [ localhost-startStop-1 ] - [ INFO  ] [ o.a.c.c.C.[Tomcat].[localhost].[/search] : 180 ] - Initializing Spring embedded WebApplicationContext
+2021-03-30 00:29:50.566 [ restartedMain ] - [ WARN  ] [ com.netflix.config.sources.URLConfigurationSource : 120 ] - No URLs will be polled as dynamic configuration sources.
+2021-03-30 00:29:50.567 [ restartedMain ] - [ INFO  ] [ com.netflix.config.sources.URLConfigurationSource : 121 ] - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2021-03-30 00:29:50.575 [ restartedMain ] - [ WARN  ] [ com.netflix.config.sources.URLConfigurationSource : 120 ] - No URLs will be polled as dynamic configuration sources.
+2021-03-30 00:29:50.576 [ restartedMain ] - [ INFO  ] [ com.netflix.config.sources.URLConfigurationSource : 121 ] - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2021-03-30 00:29:51.190 [ restartedMain ] - [ INFO  ] [ com.search.service.config.WebMvcConfig : 19 ] - 本地图片存储路径：F:/BaiduYunDownload/data/data/img/songListPic/
+2021-03-30 00:29:57.071 [ restartedMain ] - [ INFO  ] [ org.apache.coyote.http11.Http11NioProtocol : 180 ] - Starting ProtocolHandler ["http-nio-8091"]
+2021-03-30 00:29:57.074 [ restartedMain ] - [ INFO  ] [ org.apache.tomcat.util.net.NioSelectorPool : 180 ] - Using a shared selector for servlet write/read
+2021-03-30 00:29:57.120 [ restartedMain ] - [ INFO  ] [ com.search.service.Application : 57 ] - Started Application in 19.103 seconds (JVM running for 24.716)

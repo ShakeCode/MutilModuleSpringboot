@@ -3,8 +3,9 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/business.activiti.service" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/business.activity.service" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/business.activity.service/src/main/resources/application.yml" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/business.activiti.service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/business.data.service" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/business.data.service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/business.search.service/src/main/java" charset="UTF-8" />
   </component>
 </project>
