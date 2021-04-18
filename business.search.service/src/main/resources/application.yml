@@ -2,6 +2,21 @@ server:
   context-path: /search
   port: 8091
 
+Cipher:
+  secret.key:
+    algorithm: PBKDF2WithHmacSHA1
+    sepc:
+      algorithm: AES
+      #若密钥长度是256需要特殊处理, 替换JCE jar包(local_policy.jar和US_export_policy.jar)
+      size: 128
+      iterations: 65536
+  intance:
+    ## 初始化Cipher需要向量IV,"AES/ECB/PKCS5Padding"-默认的加密算法,不需要初始向量（IV）,容易被破解
+    algorithm: AES/CBC/PKCS5Padding
+  salt:
+    algorithm: SHA1PRNG
+  splitor: '&'
+
 
 elasticSearch:
   hostlist: 127.0.0.1:9200
