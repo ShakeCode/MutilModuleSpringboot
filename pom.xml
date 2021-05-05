@@ -12,6 +12,8 @@
         <module>business.data.service</module>
         <module>business.activiti.service</module>
         <module>business.search.service</module>
+        <module>business.rocketmq.service</module>
+        <module>business.redis.service</module>
     </modules>
 
     <parent>

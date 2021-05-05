@@ -1,0 +1,14 @@
+server:
+  context-path: /
+  port: 8090
+
+rocketmq:
+  #定义name-server地址
+  name-server: 127.0.0.1:9876
+  producer:
+    # 定义发布者组名
+    group: producer-group
+  consumer:
+    # 发送的topic
+    group: customer-group
+  topic: my-topic
