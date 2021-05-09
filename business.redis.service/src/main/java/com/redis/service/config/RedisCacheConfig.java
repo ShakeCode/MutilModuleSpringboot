@@ -22,9 +22,9 @@ public class RedisCacheConfig {
     @Bean(name = "redisCacheManager")
     public RedisCacheManager redisCacheManager(RedisTemplate redisTemplate) {
         RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);
-        //默认使用cacheNames作为key的前缀
+        // 默认使用cacheNames作为key的前缀
         cacheManager.setUsePrefix(true);
-        //设置缓存过期时间(秒)
+        // 设置缓存过期时间(秒)
         cacheManager.setDefaultExpiration(30);
         return cacheManager;
     }

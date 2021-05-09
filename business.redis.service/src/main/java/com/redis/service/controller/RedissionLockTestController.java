@@ -48,6 +48,12 @@ public class RedissionLockTestController {
             if (!isLock) {
                 return ResultVO.fail("操作太频繁,请稍后重试");
             }
+            // 获取锁之后
+            if (count <= 0) {
+                redLockService.unLock(lockKey);
+                LOGGER.info("抢完了,库存剩余为：{}", count);
+                return ResultVO.fail("抢完了,抢购失败");
+            }
             // 执行业务(需要锁定的部分)
             count--;
             LOGGER.info("抢购成功, 库存剩余为：{}", count);

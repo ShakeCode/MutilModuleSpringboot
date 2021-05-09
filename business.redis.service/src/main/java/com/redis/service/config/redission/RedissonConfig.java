@@ -8,7 +8,8 @@ import org.redisson.config.Config;
 import org.redisson.config.ReadMode;
 import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,7 +37,7 @@ import java.util.List;
  * 挂载配置文件启动：redis-server.exe  redis.windows.conf
  * <p>
  * https://blog.csdn.net/Sibylsf/article/details/105820463
- *
+ * <p>
  * https://blog.csdn.net/weixin_34418883/article/details/88114907
  *
  * <p>
@@ -47,6 +48,8 @@ import java.util.List;
 @ConditionalOnClass({Redisson.class})
 @ConditionalOnExpression("'${spring.redis.mode}'=='single' or '${spring.redis.mode}'=='cluster' or '${spring.redis.mode}'=='sentinel'")
 public class RedissonConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedissonConfig.class);
+
     private final RedisProperties redisProperties;
 
     /**
@@ -57,9 +60,14 @@ public class RedissonConfig {
         this.redisProperties = redisProperties;
     }
 
+    /**
+     * Redisson single redisson client.
+     * @return the redisson client
+     */
     @Bean
     @ConditionalOnProperty(name = "spring.redis.mode", havingValue = "single")
     RedissonClient redissonSingle() {
+        LOGGER.info("single redisProperties:{}", redisProperties.getSingle());
         Config config = new Config();
         String node = redisProperties.getSingle().getAddress();
         node = node.startsWith("redis://") ? node : "redis://" + node;
@@ -75,16 +83,20 @@ public class RedissonConfig {
     }
 
 
+    /**
+     * Redisson cluster redisson client.
+     * @return the redisson client
+     */
     @Bean
     @ConditionalOnProperty(name = "spring.redis.mode", havingValue = "cluster")
     RedissonClient redissonCluster() {
-        System.out.println("cluster redisProperties:" + redisProperties.getCluster());
+        LOGGER.info("cluster redisProperties:{}", redisProperties.getCluster());
         Config config = new Config();
         String[] nodes = redisProperties.getCluster().getNodes().split(",");
-        List<String> newNodes = new ArrayList(nodes.length);
+        List<String> newNodes = new ArrayList<>(nodes.length);
         Arrays.stream(nodes).forEach((index) -> newNodes.add(
                 index.startsWith("redis://") ? index : "redis://" + index));
-         config.useClusterServers()
+        config.useClusterServers()
                 .addNodeAddress(newNodes.toArray(new String[0]))
                 .setScanInterval(
                         redisProperties.getCluster().getScanInterval())
@@ -117,10 +129,10 @@ public class RedissonConfig {
     @Bean
     @ConditionalOnProperty(name = "spring.redis.mode", havingValue = "sentinel")
     RedissonClient redissonSentinel() {
-        System.out.println("sentinel redisProperties:" + redisProperties.getSentinel());
+        LOGGER.info("sentinel redisProperties:{}", redisProperties.getSentinel());
         Config config = new Config();
         String[] nodes = redisProperties.getSentinel().getNodes().split(",");
-        List<String> newNodes = new ArrayList(nodes.length);
+        List<String> newNodes = new ArrayList<>(nodes.length);
         Arrays.stream(nodes).forEach((index) -> newNodes.add(
                 index.startsWith("redis://") ? index : "redis://" + index));
 
@@ -136,7 +148,6 @@ public class RedissonConfig {
         if (StringUtils.isNotBlank(redisProperties.getPassword())) {
             serverConfig.setPassword(redisProperties.getPassword());
         }
-
         return Redisson.create(config);
     }
 }

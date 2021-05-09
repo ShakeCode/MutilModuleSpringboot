@@ -2,75 +2,72 @@ server:
   context-path: /
   port: 8190
 
-spring.redis.database=10
-spring.redis.password=
-spring.redis.timeout=3000
-
-spring.redis.mode=single
-
-#连接池配置
-spring.redis.pool.max-idle=16
-spring.redis.pool.min-idle=8
-spring.redis.pool.max-active=8
-spring.redis.pool.max-wait=3000
-spring.redis.pool.conn-timeout=3000
-spring.redis.pool.so-timeout=3000
-spring.redis.pool.size=10
-
-#单机配置
-spring.redis.single.address=192.168.60.23:6379
-
-#集群配置
-spring.redis.cluster.scan-interval=1000
-spring.redis.cluster.nodes=
-spring.redis.cluster.read-mode=SLAVE
-spring.redis.cluster.retry-attempts=3
-spring.redis.cluster.failed-attempts=3
-spring.redis.cluster.slave-connection-pool-size=64
-spring.redis.cluster.master-connection-pool-size=64
-spring.redis.cluster.retry-interval=1500
-#哨兵配置
-spring.redis.sentinel.master=business-master
-spring.redis.sentinel.nodes=
-spring.redis.sentinel.master-onlyWrite=true
-spring.redis.sentinel.fail-max=3
-
 spring:
   redis:
     mode: single
-    #默认选择0数据库
-    database: 10
+    #通用配置
     host: 127.0.0.1:6379
+    #数据库X号
+    database: 10
     password:
-    #port: 6379
     # 跨集群执行命令时最大重定向数量
     max-redirects: 5
-
-    jedis:
-      pool:
-        # 连接池最大连接数（使用负值表示没有限制）
-        max-active: 100
-        # 连接池最大阻塞等待时间（使用负值表示没有限制）
-        max-wait: 6000
-        # 连接池中的最大空闲连接
-        max-idle: 100
-        # 连接池中的最小空闲连接
-        min-idle: 0
     # 连接超时时间（毫秒）
-    timeout: 30000
+    timeout: 3000
+    #连接池配置
+    # 连接池中的最大空闲连接
+    pool.max-idle: 16
+    # 连接池中的最小空闲连接
+    pool.min-idle: 8
+    # 连接池最大连接数（使用负值表示没有限制）
+    pool.max-active: 8
+    # 连接池最大阻塞等待时间（使用负值表示没有限制）
+    pool.max-wait: 3000
+    # 连接池连接最大超时时间
+    pool.conn-timeout: 3000
+    # 空闲连接连接超时时间
+    pool.so-timeout: 3000
+    # 连接池大小
+    pool.size: 10
+    #单机配置
+    single:
+      address: 127.0.0.1:6379
 
-  redisson:
-    #地址（逗号隔开）
-    address: 127.0.0.1:6379
-    #尝试时间
-    try-time: 0
-    #锁的时间
-    lock-time: 4
-    #redis密码
-    password:
-    #扫描间隔
-    scanInterval: 2000
-    #命令失败重试次数
-    retryAttempts: 5
-    #超时时间
-    timeout: 10000
+    #集群配置
+    cluster.scan-interval: 1000
+    cluster.nodes:  127.0.0.1:6379
+    cluster.read-mode: SLAVE
+    cluster.retry-attempts: 3
+    cluster.failed-attempts: 3
+    cluster.slave-connection-pool-size: 64
+    cluster.master-connection-pool-size: 64
+    cluster.retry-interval: 1500
+
+    #哨兵配置
+    sentinel.master: business-maste
+    sentinel.nodes: 127.0.0.1:6379
+    sentinel.master-onlyWrite: true
+    sentinel.fail-max: 3
+
+#spring:
+#  redis:
+#    #默认选择0数据库
+#    database: 10
+#    host: 127.0.0.1:6379
+#    password:
+#    #port: 6379
+#    # 跨集群执行命令时最大重定向数量
+#    max-redirects: 5
+#
+#    jedis:
+#      pool:
+#        # 连接池最大连接数（使用负值表示没有限制）
+#        max-active: 100
+#        # 连接池最大阻塞等待时间（使用负值表示没有限制）
+#        max-wait: 6000
+#        # 连接池中的最大空闲连接
+#        max-idle: 100
+#        # 连接池中的最小空闲连接
+#        min-idle: 0
+#    # 连接超时时间（毫秒）
+#    timeout: 30000

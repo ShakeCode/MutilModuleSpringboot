@@ -10,6 +10,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "spring.redis", ignoreUnknownFields = false)
 @Data
 public class RedisProperties {
+    private String host;
+
+    private int maxRedirects;
 
     private int database;
 

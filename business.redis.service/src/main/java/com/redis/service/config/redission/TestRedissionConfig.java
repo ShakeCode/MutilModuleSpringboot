@@ -1,5 +1,9 @@
 package com.redis.service.config.redission;
 
+/**
+ * 使用 application-dev.yml 配置
+ * The type Test redission config.
+ */
 public class TestRedissionConfig {
 
 //    @Value("${spring.redis.host:127.0.0.1}")
