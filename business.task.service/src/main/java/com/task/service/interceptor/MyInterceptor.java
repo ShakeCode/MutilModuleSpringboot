@@ -1,8 +1,8 @@
-package com.redis.service.interceptor;
+package com.task.service.interceptor;
 
-import com.redis.service.constant.Constant;
-import com.redis.service.model.HeaderInfo;
-import com.redis.service.utils.ThreadHeaderLocalUtil;
+import com.task.service.constant.Constant;
+import com.task.service.model.HeaderInfo;
+import com.task.service.utils.ThreadHeaderLocalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;

@@ -1,0 +1,7 @@
+server:
+  context-path: /task
+  port: 8092
+
+logging:
+  level:
+    com.search.service.client: debug

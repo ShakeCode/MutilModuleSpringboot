@@ -14,6 +14,7 @@
         <module>business.search.service</module>
         <module>business.rocketmq.service</module>
         <module>business.redis.service</module>
+        <module>business.task.service</module>
     </modules>
 
     <parent>
