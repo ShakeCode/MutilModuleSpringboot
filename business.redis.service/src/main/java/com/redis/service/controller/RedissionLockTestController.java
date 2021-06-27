@@ -2,6 +2,7 @@ package com.redis.service.controller;
 
 import com.redis.service.lock.redissionlock.RedLockService;
 import com.redis.service.model.ResultVO;
+import com.redis.service.redlock.RedisLock;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Redission lock test controller.
@@ -22,7 +24,7 @@ public class RedissionLockTestController {
 
     private static final String accountOrderLockKey = "ACCOUNT_PAY_UNIFIEDORDER_LOCK_KEY_TRADE_NO";
 
-    private  int count = 100;
+    private int count = 100;
 
     /**
      * Instantiates a new Redission lock test controller.
@@ -43,7 +45,7 @@ public class RedissionLockTestController {
         boolean isLock = false;
         try {
             // 获得锁 注意锁的力度,只需要锁定需要防止并发的业务,锁的力度越低性能越好!
-            isLock = redLockService.tryLockTimeout(lockKey, 5000, 10000);
+            isLock = redLockService.tryLockTimeout(lockKey, 5000, 10000, TimeUnit.MILLISECONDS);
             // 超时未获得锁
             if (!isLock) {
                 return ResultVO.fail("操作太频繁,请稍后重试");
@@ -67,5 +69,15 @@ public class RedissionLockTestController {
                 redLockService.unLock(lockKey);
             }
         }
+    }
+
+    @ApiOperation(value = "切面分布式RedLock锁", notes = "切面分布式RedLock锁")
+    @RedisLock(prefix = "order", lockKey = "orderLock", waitTime = 3000, leaseTime = 6000, timeUnit = TimeUnit.MILLISECONDS)
+    @RequestMapping(value = "order/test")
+    public ResultVO takeOrderTest() {
+        // 执行业务(需要锁定的部分)
+        count--;
+        LOGGER.info("抢购成功, 库存剩余为：{}", count);
+        return ResultVO.success("抢购成功");
     }
 }
