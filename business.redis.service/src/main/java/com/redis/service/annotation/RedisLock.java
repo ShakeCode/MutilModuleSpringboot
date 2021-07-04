@@ -1,4 +1,4 @@
-package com.redis.service.redlock;
+package com.redis.service.annotation;
 
 
 import java.lang.annotation.ElementType;

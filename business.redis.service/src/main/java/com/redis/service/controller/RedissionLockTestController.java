@@ -1,8 +1,9 @@
 package com.redis.service.controller;
 
+import com.redis.service.annotation.LogTime;
+import com.redis.service.annotation.RedisLock;
 import com.redis.service.lock.redissionlock.RedLockService;
 import com.redis.service.model.ResultVO;
-import com.redis.service.redlock.RedisLock;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,10 @@ public class RedissionLockTestController {
      * Take order result vo.
      * @return the result vo
      */
+    @LogTime(operationMessage = "test order lock")
     @ApiOperation(value = "统一入口", notes = "统一入口")
     @RequestMapping(value = "order")
-    public ResultVO takeOrder() {
+    public ResultVO<String> takeOrder() {
         String lockKey = accountOrderLockKey + UUID.randomUUID().toString();
         boolean isLock = false;
         try {
@@ -71,10 +73,11 @@ public class RedissionLockTestController {
         }
     }
 
+    @LogTime(operationMessage = "aspect test order redisson lock")
     @ApiOperation(value = "切面分布式RedLock锁", notes = "切面分布式RedLock锁")
-    @RedisLock(prefix = "order", lockKey = "orderLock", waitTime = 3000, leaseTime = 6000, timeUnit = TimeUnit.MILLISECONDS)
+    @RedisLock(prefix = "order", lockKey = "orderLock", waitTime = 3000, leaseTime = 6000)
     @RequestMapping(value = "order/test")
-    public ResultVO takeOrderTest() {
+    public ResultVO<String> takeOrderTest() {
         // 执行业务(需要锁定的部分)
         count--;
         LOGGER.info("抢购成功, 库存剩余为：{}", count);

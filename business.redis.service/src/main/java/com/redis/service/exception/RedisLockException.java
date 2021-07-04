@@ -1,4 +1,4 @@
-package com.redis.service.redlock;
+package com.redis.service.exception;
 
 import lombok.Data;
 

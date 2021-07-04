@@ -1,5 +1,6 @@
-package com.redis.service.redlock;
+package com.redis.service.aspect;
 
+import com.redis.service.annotation.RedisLock;
 import com.redis.service.lock.redissionlock.RedLockService;
 import com.redis.service.model.ResultVO;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,6 +20,9 @@ import java.lang.reflect.Method;
 import java.util.UUID;
 
 /**
+ * 锁名称建议参考阿里redis开发规范:
+ * https://developer.aliyun.com/article/531067
+ * <p>
  * The type Redis lock aspect.
  */
 @Aspect
@@ -39,7 +43,7 @@ public class RedisLockAspect {
     /**
      * Pointcut.
      */
-    @Pointcut("@annotation(com.redis.service.redlock.RedisLock)")
+    @Pointcut("@annotation(com.redis.service.annotation.RedisLock)")
     public void pointcut() {
     }
 
@@ -66,11 +70,12 @@ public class RedisLockAspect {
         }
         RedisLock annotation = method.getAnnotation(RedisLock.class);
         String prefix = annotation.prefix();
+        String key = annotation.lockKey();
         long leaseTime = annotation.leaseTime();
         Object result;
         // String lockParamKey = StringUtils.arrayToDelimitedString(args, ".");
         String lockParamKey = UUID.randomUUID().toString();
-        String lockKey = this.getLockKey(prefix, targetClass.getSimpleName(), method.getName(), lockParamKey);
+        String lockKey = this.getLockKey(prefix, key, targetClass.getSimpleName(), method.getName(), lockParamKey);
         if (redLockService.tryLockTimeout(lockKey, annotation.waitTime(), leaseTime, annotation.timeUnit())) {
             LOGGER.info("加锁成功:{}", lockKey);
             try {
@@ -86,7 +91,7 @@ public class RedisLockAspect {
         return result;
     }
 
-    private String getLockKey(String prefix, String className, String invokedMethod, String lockParamKey) {
-        return StringUtils.hasText(prefix) ? "lock." + prefix + lockParamKey : "lock." + className + "." + invokedMethod + "." + lockParamKey;
+    private String getLockKey(String prefix, String key, String className, String invokedMethod, String lockParamKey) {
+        return StringUtils.hasText(prefix) ? "lock".concat(":").concat(prefix).concat(":") + key.concat(":" + lockParamKey) : "lock".concat(":").concat(className).concat(":").concat(invokedMethod).concat(":" + lockParamKey);
     }
 }
