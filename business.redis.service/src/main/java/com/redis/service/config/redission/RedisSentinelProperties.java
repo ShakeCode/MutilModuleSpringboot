@@ -24,4 +24,13 @@ public class RedisSentinelProperties {
      *
      */
     private int failMax;
+
+    /**
+     * （从节点连接池大小） 默认值：64
+     */
+    private int slaveConnectionPoolSize;
+    /**
+     * 主节点连接池大小）默认值：64
+     */
+    private int masterConnectionPoolSize;
 }

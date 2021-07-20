@@ -4,12 +4,12 @@ server:
 
 spring:
   redis:
-    mode: single
+    mode: sentinel
     #通用配置
-    host: 127.0.0.1:6379
+    host: 127.0.0.1:27002
     #数据库X号
     database: 10
-    password:
+    password: 
     # 跨集群执行命令时最大重定向数量
     max-redirects: 5
     # 连接超时时间（毫秒）
@@ -28,14 +28,14 @@ spring:
     # 空闲连接连接超时时间
     pool.so-timeout: 3000
     # 连接池大小
-    pool.size: 10
+    pool.size: 20
     #单机配置
     single:
-      address: 127.0.0.1:6379
+      address: 127.0.0.1:27002
 
     #集群配置
     cluster.scan-interval: 1000
-    cluster.nodes:  127.0.0.1:6379
+    cluster.nodes:  127.0.0.1:27001,127.0.0.1:27002,127.0.0.1:27003
     cluster.read-mode: SLAVE
     cluster.retry-attempts: 3
     cluster.failed-attempts: 3
@@ -44,10 +44,12 @@ spring:
     cluster.retry-interval: 1500
 
     #哨兵配置
-    sentinel.master: business-maste
-    sentinel.nodes: 127.0.0.1:6379
+    sentinel.master: zlj-master
+    sentinel.nodes: 127.0.0.1:27001,127.0.0.1:27002,127.0.0.1:27003
     sentinel.master-onlyWrite: true
     sentinel.fail-max: 3
+    sentinel.slave-connection-pool-size: 64
+    sentinel.master-connection-pool-size: 64
 
 #spring:
 #  redis:
