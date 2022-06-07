@@ -1,9 +1,11 @@
 package com.search.service.config;
 
+import com.search.service.utils.HeaderContext;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -36,6 +38,18 @@ public class FeignInterceptor implements RequestInterceptor {
                     }
                 }
             }
+        }
+        // 获取主子线程的请求头信息
+        if (!StringUtils.isEmpty(HeaderContext.getHeaderInfo().getUserInfo())) {
+            requestTemplate.header("user-info", HeaderContext.getHeaderInfo().getUserInfo());
+        }
+
+        if (!StringUtils.isEmpty(HeaderContext.getHeaderInfo().getTenantCode())) {
+            requestTemplate.header("tenant-code", HeaderContext.getHeaderInfo().getTenantCode());
+        }
+
+        if (!StringUtils.isEmpty(HeaderContext.getHeaderInfo().getGcAuthentication())) {
+            requestTemplate.header("gc-authentication", HeaderContext.getHeaderInfo().getGcAuthentication());
         }
     }
 

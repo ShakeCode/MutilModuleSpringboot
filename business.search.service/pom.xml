@@ -50,6 +50,14 @@
             <artifactId>elasticsearch</artifactId>
             <version>${elasticsearch.version}</version>
         </dependency>
+
+        <!--解决threadlocal在线程池传递线程内存数据不安全问题-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>transmittable-thread-local</artifactId>
+            <version>2.12.6</version>
+        </dependency>
+
     </dependencies>
 
     <!--spring boot打包的话需要指定一个唯一的入门-->

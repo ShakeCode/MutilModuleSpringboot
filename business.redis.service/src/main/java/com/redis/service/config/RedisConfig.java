@@ -3,6 +3,9 @@ package com.redis.service.config;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
+import com.google.common.hash.Funnel;
+import com.redis.service.redisbloom.BloomFilterHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -116,5 +119,11 @@ public class RedisConfig {
             jcf.setPassword(password); // 集群的密码认证
             return jcf;
         }
+    }
+
+    @Bean
+    public BloomFilterHelper<String> initBloomFilterHelper() {
+        return new BloomFilterHelper<>((Funnel<String>) (from, into) -> into.putString(from, Charsets.UTF_8)
+                .putString(from, Charsets.UTF_8), 1000000, 0.01);
     }
 }
