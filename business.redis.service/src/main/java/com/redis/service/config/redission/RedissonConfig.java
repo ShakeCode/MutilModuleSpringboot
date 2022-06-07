@@ -1,6 +1,7 @@
 package com.redis.service.config.redission;
 
 import com.redis.service.config.RedisProperties;
+import com.redis.service.constant.Constant;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -57,6 +58,7 @@ public class RedissonConfig {
      * @param redisProperties the redis properties
      */
     public RedissonConfig(RedisProperties redisProperties) {
+        LOGGER.info(">>>redisProperties:{}", redisProperties);
         this.redisProperties = redisProperties;
     }
 
@@ -67,7 +69,7 @@ public class RedissonConfig {
     @Bean
     @ConditionalOnProperty(name = "spring.redis.mode", havingValue = "single")
     RedissonClient redissonSingle() {
-        LOGGER.info("single redisProperties:{}", redisProperties.getSingle());
+        LOGGER.info("init RedissonClient, use single redisProperties:{}", redisProperties.getSingle());
         Config config = new Config();
         String node = redisProperties.getSingle().getAddress();
         node = node.startsWith("redis://") ? node : "redis://" + node;
@@ -90,13 +92,14 @@ public class RedissonConfig {
     @Bean
     @ConditionalOnProperty(name = "spring.redis.mode", havingValue = "cluster")
     RedissonClient redissonCluster() {
-        LOGGER.info("cluster redisProperties:{}", redisProperties.getCluster());
+        LOGGER.info("init RedissonClient, use cluster redisProperties:{}", redisProperties.getCluster());
         Config config = new Config();
-        String[] nodes = redisProperties.getCluster().getNodes().split(",");
+        String[] nodes = redisProperties.getCluster().getNodes().split(Constant.COMMA);
         List<String> newNodes = new ArrayList<>(nodes.length);
         Arrays.stream(nodes).forEach((index) -> newNodes.add(
                 index.startsWith("redis://") ? index : "redis://" + index));
         config.useClusterServers()
+                .setReadMode(ReadMode.MASTER_SLAVE)
                 .addNodeAddress(newNodes.toArray(new String[0]))
                 .setScanInterval(
                         redisProperties.getCluster().getScanInterval())
@@ -129,9 +132,9 @@ public class RedissonConfig {
     @Bean
     @ConditionalOnProperty(name = "spring.redis.mode", havingValue = "sentinel")
     RedissonClient redissonSentinel() {
-        LOGGER.info("sentinel redisProperties:{}", redisProperties.getSentinel());
+        LOGGER.info("init RedissonClient, use sentinel redisProperties:{}", redisProperties.getSentinel());
         Config config = new Config();
-        String[] nodes = redisProperties.getSentinel().getNodes().split(",");
+        String[] nodes = redisProperties.getSentinel().getNodes().split(Constant.COMMA);
         List<String> newNodes = new ArrayList<>(nodes.length);
         Arrays.stream(nodes).forEach((index) -> newNodes.add(
                 index.startsWith("redis://") ? index : "redis://" + index));
@@ -139,11 +142,19 @@ public class RedissonConfig {
         SentinelServersConfig serverConfig = config.useSentinelServers()
                 .addSentinelAddress(newNodes.toArray(new String[0]))
                 .setMasterName(redisProperties.getSentinel().getMaster())
-                .setReadMode(ReadMode.SLAVE)
+                .setReadMode(ReadMode.MASTER)
                 .setFailedAttempts(redisProperties.getSentinel().getFailMax())
                 .setTimeout(redisProperties.getTimeout())
                 .setMasterConnectionPoolSize(redisProperties.getPool().getSize())
-                .setSlaveConnectionPoolSize(redisProperties.getPool().getSize());
+                .setSlaveConnectionPoolSize(redisProperties.getPool().getSize())
+                .setSlaveConnectionMinimumIdleSize(redisProperties.getSentinel()
+                        .getSlaveConnectionPoolSize())
+                .setMasterConnectionMinimumIdleSize(redisProperties.getSentinel()
+                        .getSlaveConnectionPoolSize())
+                .setMasterConnectionPoolSize(redisProperties.getSentinel()
+                        .getMasterConnectionPoolSize())
+                .setSlaveConnectionPoolSize(redisProperties.getSentinel()
+                        .getSlaveConnectionPoolSize());
 
         if (StringUtils.isNotBlank(redisProperties.getPassword())) {
             serverConfig.setPassword(redisProperties.getPassword());

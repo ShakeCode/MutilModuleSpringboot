@@ -1,5 +1,10 @@
 package com.redis.service.lock.redissionlock;
 
+import java.util.concurrent.TimeUnit;
+
+/**
+ * The interface Red lock service.
+ */
 public interface RedLockService {
 
     /**
@@ -17,6 +22,7 @@ public interface RedLockService {
      * may throw an (unchecked) exception in such circumstances.  The
      * circumstances and the exception type must be documented by that
      * {@code Lock} implementation.
+     * @param lockKey the lock key
      */
     void lock(String lockKey);
 
@@ -27,17 +33,15 @@ public interface RedLockService {
      * <p>If the lock is not available then the current thread becomes
      * disabled for thread scheduling purposes and lies dormant until the
      * lock has been acquired.
-     *
+     * <p>
      * If the lock is acquired, it is held until <code>unlock</code> is invoked,
      * or until leaseTime milliseconds have passed
      * since the lock was granted - whichever comes first.
-     *
-     * @param leaseTime MILLISECONDS the maximum time to hold the lock after granting it,
-     *        before automatically releasing it if it hasn't already been released by invoking <code>unlock</code>.
-     *        If leaseTime is -1, hold the lock until explicitly unlocked.
-     *
+     * @param lockKey   the lock key
+     * @param leaseTime MILLISECONDS the maximum time to hold the lock after granting it,                  before automatically releasing it if it hasn't already been released by invoking <code>unlock</code>.                  If leaseTime is -1, hold the lock until explicitly unlocked.
+     * @param timeUnit  the time unit
      */
-    void lock(String lockKey, long leaseTime);
+    void lock(String lockKey, long leaseTime, TimeUnit timeUnit);
 
     /**
      * Returns <code>true</code> as soon as the lock is acquired.
@@ -47,13 +51,14 @@ public interface RedLockService {
      * giving up and returning <code>false</code>. If the lock is acquired,
      * it is held until <code>unlock</code> is invoked, or until <code>leaseTime</code>
      * have passed since the lock was granted - whichever comes first.
-     *
-     * @param waitTime the maximum time to aquire the lock  MILLISECONDS
+     * @param lockKey   the lock key
+     * @param waitTime  the maximum time to aquire the lock  MILLISECONDS
      * @param leaseTime lease time MILLISECONDS
+     * @param timeUnit  the time unit
      * @return <code>true</code> if lock has been successfully acquired
      * @throws InterruptedException - if the thread is interrupted before or during this method.
      */
-    boolean tryLockTimeout(String lockKey,long waitTime, long leaseTime) throws InterruptedException;
+    boolean tryLockTimeout(String lockKey, long waitTime, long leaseTime, TimeUnit timeUnit) throws InterruptedException;
 
     /**
      * Releases the lock.
@@ -66,6 +71,7 @@ public interface RedLockService {
      * an (unchecked) exception if the restriction is violated.
      * Any restrictions and the exception
      * type must be documented by that {@code Lock} implementation.
+     * @param lockKey the lock key
      */
     void unLock(String lockKey);
 }
