@@ -13,7 +13,14 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="business.activiti.service" target="1.8" />
       <module name="business.activity.service" target="1.8" />
+      <module name="business.data.service" target="1.8" />
+      <module name="business.main.service" target="1.8" />
+      <module name="business.redis.service" target="1.8" />
+      <module name="business.rocketmq.service" target="1.8" />
+      <module name="business.search.service" target="1.8" />
+      <module name="business.task.service" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

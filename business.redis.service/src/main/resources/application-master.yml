@@ -6,7 +6,7 @@ spring:
   redis:
     mode: single
     #通用配置
-    host: 127.0.0.1:6379
+    host: 127.0.0.1:7000
     #数据库X号
     database: 10
     password:
@@ -31,11 +31,11 @@ spring:
     pool.size: 10
     #单机配置
     single:
-      address: 127.0.0.1:6379
+      address: 127.0.0.1:7000
 
     #集群配置
     cluster.scan-interval: 1000
-    cluster.nodes:  127.0.0.1:6379
+    cluster.nodes:  127.0.0.1:7000
     cluster.read-mode: SLAVE
     cluster.retry-attempts: 3
     cluster.failed-attempts: 3
