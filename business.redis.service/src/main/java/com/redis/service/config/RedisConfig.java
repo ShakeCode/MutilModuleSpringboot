@@ -4,16 +4,28 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import com.google.common.hash.Funnel;
+import com.redis.service.constant.Constant;
+import com.redis.service.exception.ServiceException;
+import com.redis.service.redisbloom.BloomFilterHelper;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisNode;
+import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * linux-redis服务端下载：
@@ -116,12 +128,6 @@ public class RedisConfig {
         } else {
             throw new ServiceException("unsupport redis mode");
         }
-    }
-
-    @Bean
-    public BloomFilterHelper<String> initBloomFilterHelper() {
-        return new BloomFilterHelper<>((Funnel<String>) (from, into) -> into.putString(from, Charsets.UTF_8)
-                .putString(from, Charsets.UTF_8), 1000000, 0.01);
     }
 
     /**
