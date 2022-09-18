@@ -1,0 +1,449 @@
+
+阿里巴巴规范mysql文档:  https://blog.csdn.net/yuanxiang01/article/details/109555899
+
+
+
+--  查看是否开启：only_full_group_by 
+-- SELECT @@GLOBAL.sql_mode;   SELECT @@SESSION.sql_mode;
+-- 查询结果中可以看到ONLY_FULL_GROUP_BY这个关键字，说明开启了规则校验
+
+-- 开启时，select　后的字段必须出现在　group by 后面，或者被聚合函数包裹
+
+--- 解决方式：整改逻辑，或者关闭only_full_group_by，　或者使用any_value（）函数返回分组后第一条数据
+
+SELECT DISTINCT
+	area_code,
+	-- 	any_value (NAME) as name,
+	NAME,
+	any_value(CODE),
+	count(CODE) AS count
+FROM
+	`t_uptown_t`
+GROUP BY
+	area_code,
+	NAME
+
+
+视频学些：
+
+https://edu.csdn.net/course/detail/25283?utm_medium=distribute.pc_relevant.none-task-course-BlogCommendFromMachineLearnPai2-5.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-course-BlogCommendFromMachineLearnPai2-5.channel_param
+
+mysql help 命令讲解：
+
+http://blog.itpub.net/28218939/viewspace-2158161/
+
+https://www.cnblogs.com/gered/p/10797012.html
+
+mysql 官方手册：
+
+https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_find-in-set
+
+《mysql 开发规范》
+
+
+1、表命名 t_xxx_m (主表), t_xxx_e（扩展表）
+
+2、必须有自增主键ID，尽量确定唯一索引（可避免重复数据插入提前知晓），走的索引类型都是const， 优于ref（normal index BTree）
+
+显示查询使用了何种类型,从最好到最差依次是:system > const > eq_ref > ref > range > index > all
+
+3、连表查询在5个以内的left join 
+
+4、尽量少使用物理外键关联表关系！！
+
+4、对于组合条件的查询，设置联合索引(唯一索引等)，避免重复索引设置，造成不必要的索引消耗资源，
+例如： 联合索引 （a,b,c ）会产生a,ab, abc 3个索引，这时候就不需要再设置a为普通索引
+
+根据最左匹配原则，where条件的 字段把经常使用的查询字段 和走索引的字段 放在最左边
+
+
+5、索引不是越多越好，太多索引会造成表的写，更新，删除的效率变低，单表的索引数量尽量小于5个
+
+6、模糊查询只有右模糊 xxx% 才会走索引， 全模糊和左模糊不走索引！！！
+
+7、数量量的表ID 必须设置bigInt 类型
+
+8、避免类型的字段设置太长，造成缓存空间浪费，对于vachar(1000)这种也不适合设置索引
+
+9、不等于 空 使用 is not null， is null，避免使用！= null
+
+10、SQL不是越长越好，必要时需要拆分为2次查询SQL，避免在SQL中有过多的业务处理逻辑，应该放在代码中处理
+
+11、where 条件的字段赋值，数值类型不可使用 引号，字符串类型避免使用 数值，不可做隐式转换！！！
+
+
+12、对于复杂SQL，使用子查询提前查询需要连接的数据，会增加查询速度
+
+13、先查子查询再连接可加快查询速度。例如: select t1.* from table1 t1,(select from table2 t2) where t1.code=t2.code
+
+14、使用的查询SQL，优化查询时候，必须使用explain sql 进行分析，确保查询的效率使用了最优的索引类型
+显示查询使用了何种类型,从最好到最差依次是:system > const > eq_ref > ref > range > index > all
+
+
+15、大数量下的表查询不适合使用find_in_set, 可以用以下方法优化（行转列后连接查询）：
+
+！！！最大ID值528！！！
+
+a,b,c 行专列：
+
+select substring_index(substring_index('82,83,84,85,86',',',help_topic_id+1),',',-1) as Id
+from mysql.help_topic
+where help_topic_id<(length('82,83,84,85,86')-length(replace('82,83,84,85,86',',',''))+1);
+
+《explain 实验》
+
+-- 全表扫描，大数量百万以上表不适合使用！！！
+explain SELECT * FROM `t_singer` where find_in_set(type,"1,2,3");
+
+-- 索引类型：ref
+explain SELECT * FROM `t_singer` where type in("1,2,3");
+
+-- 全表扫描
+explain SELECT * FROM `t_singer` where type REGEXP '1|2|3';
+
+-- ref ,rangg,all 索引，，速度最快！！！ 但是help_topic_id 至支持528列id， 如果满足业务可以使用
+explain
+SELECT tt.* FROM `t_singer` tt,
+(select substring_index(substring_index('82,83,84,85,86',',',help_topic_id+1),',',-1) as Id
+from mysql.help_topic
+where help_topic_id<(length('82,83,84,85,86')-length(replace('82,83,84,85,86',',',''))+1)) aa where tt.type=aa.Id
+
+《explain 实验》
+
+16、SQL不是越长越好，必要时需要拆分为2次SQL，必要数据处理在Java代码实现
+
+
+17、查询表总数可以使用：show  table status like "表名%"
+
+18、避免程序循环查库，除非数据量很大， 可以使用分页查询。否则一次性读取！！！
+
+17、学会查询top15慢查询SQL，分析优化效率！！！：
+
+17.1、【慢查询日志查看方法】：
+show variables like 'slow_query%';
+
+show variables like "%long_query_time%"
+
+show variables like '%slow_query_log%';
+
+临时开启：set global slow_query_log=1; 内存里开启  ,关闭： set global slow_query_log='OFF';
+
+exit退出，  重启mysql后关闭service mysql restart 
+
+永久开启：
+/etc/my.cnf 中追加配置
+				vi /etc/my.cnf
+				[mysqld]
+				show_query_log=1
+				show_query_log_file = /var/lib/mysql/localhost-slow.log
+				
+慢查询阈值：
+show variables like "%long_query_time%"   查看默认设置的多少时间为慢查询时间，单位s，默认为10秒
+
+设置临时阈值：
+set gloable long_query_time = 5; ---设置完毕后重新登录后起效（不需要重启服务）
+
+
+【慢sql进程查询】：
+
+select * from information_schema.processlist where COMMAND !='Sleep' order by time desc limit 10 ;
+
+指定数据库：
+select * from information_schema.processlist where db='promotion' and COMMAND !='Sleep' order by time desc limit 10 ;
+
+删除执行慢的sql,  sql太慢回导致数据库连接一致未释放， sql执行是同步竞争谁先执行的（否则数据库数据肯定异常），导致接口获取数据库连接异常导致报错
+kill id值
+
+17.2、通过mysqldumpslow工具查看慢sql,可以通过一写过滤条件，快速查找到需要定位的慢sql
+
+mysqldumpslow --help
+s：排序方式
+r：逆序
+l：锁定时间
+g：正则匹配模式
+----获取返回记录组多的3个sql
+mysqldumpslow -s r -t 3 /var/log/mysql/mysql-slow.log
+----获取访问次数最多的3个sql
+mysqldumpslow -s c -t 3 /var/log/mysql/mysql-slow.log
+----按照时间排序，前10条包含left join查询语句的sql
+mysqldumpslow -s t -t -g "letf join" /var/log/mysql/mysql-slow.log
+
+默认情况下，MySQL数据库并不启动慢查询日志，需要手动开启配置。如果不是调优需要的话，一般不建议启动该参数，因为开启慢查询日志会或多或少带来一定的性能影响。
+
+17.3 慢SQL分析!!!!!
+操纵：开启配置
+
+1 、慢sql查询是否开启
+
+SHOW VARIABLES LIKE 'log_slow_queries';  开启 ON 关闭OFF 默认是OFF
+
+2、查看慢sql统计时间
+
+show variables like '%long_query_time%'  默认10.0000 统计大于10秒的sql
+
+3、慢sql查询日志是否开启
+
+show variables like '%slow_query_log%' ；开启 ON 关闭OFF 默认是OFF
+
+4、查看慢sql日志位置
+
+show variables like '%slow_query_log_file%'  文件夹位置
+
+5、开启慢sql查询
+
+set global slow_query_log=1
+
+6、设置慢sql查询统计时间
+
+set global long_query_time=0.2 设置为200ms
+
+完成上述内容以后，等待一段时间，去到指定日志位置查看日志文件，通过日志文件就可以使用慢sql分析软件或explain去分析慢sql以达到最终的优化。
+
+《拆分字符串行转列存入临时表》
+CREATE DEFINER=`root`@`localhost` PROCEDURE `split`(in _string varchar(300))
+BEGIN
+# 求分割符号','的位置
+declare _index int;
+ 
+#使用临时表存储分割后的结果
+drop temporary table if exists tmp_strs;
+create temporary table tmp_strs(
+str VARCHAR(50) NOT NULL  COMMENT '编码'
+)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='分割结果表';
+ 
+set _index = locate(',',_string);
+while _index > 0
+do
+insert into tmp_strs values(left(_string,_index-1));#将子字符串存入临时表
+set _string =substr(_string from _index+1);
+set _index = locate(',',_string);
+end while;
+ 
+if length(_string) >= 0 then
+insert into tmp_strs values(_string);
+end if;
+ 
+END
+
+--------------------------------------
+
+临时表：
+drop temporary table if exists tmp_strs;
+create temporary table tmp_strs(
+`id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID', 
+level int(10) DEFAULT NULL  COMMENT '层级', 
+str VARCHAR(50) NOT NULL  COMMENT '编码',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='分割结果表';
+
+
+查询自增ID： select @AUTO_INCRMENT
+
+改良：
+
+CREATE  PROCEDURE `split`(in _string varchar(300))
+BEGIN
+
+-- 测试数据：  "-1,GD,DG,DG06,DG0602,DG060201"
+
+# 求分割符号','的位置
+declare _index int;
+-- 处理自增ID赋值
+declare tem_id int;
+
+
+
+#使用临时表存储分割后的结果
+drop temporary table if exists tmp_strs;
+
+
+
+create temporary table tmp_strs(
+`id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID', 
+level int(10) DEFAULT NULL  COMMENT '层级', 
+str VARCHAR(50) NOT NULL  COMMENT '编码',
+PRIMARY KEY (`id`)
+)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='分割结果表';
+
+-- 返回字符串,中第一次出现子字符串的位置
+set _index = locate(',',_string);
+set tem_id=1;
+while _index > 0
+do
+#将子字符串存入临时表  -1, 
+insert into tmp_strs values(tem_id,_index, left(_string,_index-1));
+# -1,GD,DG,DG06,DG0602,DG060201 -> GD,DG,DG06,DG0602,DG060201
+set _string =substr(_string from _index+1);
+set _index = locate(',',_string);
+set tem_id =tem_id+1;
+end while;
+ 
+-- 最后一个数据
+if length(_string) >= 0 then
+insert into tmp_strs values(tem_id ,_index,_string);
+end if;
+
+select * from tmp_strs order by LENGTH(str);
+
+ 
+END
+--------------------------------------
+
+区域信息递归补全地市和区县的区域编码 存储过程：
+
+BEGIN
+
+
+declare tem_code VARCHAR(50);
+declare tem_name VARCHAR(50);
+declare tem_level VARCHAR(50);
+declare tem_parent_code VARCHAR(50);
+declare tem_all_parent_code VARCHAR(50);
+
+DECLARE done INT DEFAULT FALSE;
+
+-- 声明游标
+DECLARE cusr CURSOR FOR select code, name, level, parent_code, all_parent_code from tmp_grid_m where level ;
+
+-- 声明游标停止事件标识
+DECLARE
+    CONTINUE HANDLER FOR NOT FOUND
+SET
+    done = TRUE;
+
+
+
+#区域信息临时表
+drop temporary table if exists tmp_grid_m;
+create temporary table tmp_grid_m(
+ `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '名称',
+  `level` int DEFAULT NULL COMMENT '层级',
+  `parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级编码',
+  `all_parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级全路径编码'
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='区域信息临时表';
+
+-- 同步区域数据
+insert into tmp_grid_m select code,name, level, parent_code,  all_parent_code from t_grid_m; 
+
+select * from tmp_grid_m;
+
+#区域转换结果信息临时表, 取出地市和区县编码为横表字段
+drop temporary table if exists grid_result_m;
+create temporary table grid_result_m(
+  `city_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '地市编码',
+  `district_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '区县编码',
+	`grid_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
+	`name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
+	`level` int(11) DEFAULT NULL COMMENT '层级',
+  `parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级编码',
+  `all_parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级全路径编码'
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='区域转换结果信息临时表';
+
+-- 打开游标
+open cusr;
+	grid_loop: loop
+    FETCH cusr INTO tem_code,tem_name,tem_level,tem_parent_code,tem_all_parent_code;
+		if done then 
+			leave grid_loop;
+		end if;
+		-- 插入基础数据
+		insert into grid_result_m(grid_code,name,level,parent_code, all_parent_code) values(tem_code,tem_name,tem_level, tem_parent_code, tem_all_parent_code);
+
+
+		# 转换地市编码,转换区县编码
+
+		set @grid_code :=tem_code;
+		set @level_num :=tem_level;
+
+		update grid_result_m bb,
+		(
+		SELECT 
+		id,temCode, parent_code, level+1 as fianl_level
+		FROM ( 
+				SELECT 
+						@code AS temCode, 
+						(SELECT @code := parent_code FROM t_grid_m WHERE code = temCode) AS parent_code, 
+						 @level :=  @level -1 AS  level,
+						 @id :=  @id +1 AS  id
+				FROM 
+						(SELECT @code :=@grid_code ,  @level :=@level_num, @id := 0) vars, 
+						t_grid_m h 
+				WHERE level >= 0
+		) 
+		T1 
+		where level = 2
+		) aa set bb.district_code= aa.temCode , bb.city_code = aa.parent_code where bb.grid_code=@grid_code;
+
+	end loop;
+
+-- 关闭游标
+close cusr;
+
+select * from grid_result_m;
+ 
+END
+
+
+--------------------------------------
+
+《并发锁优化》
+insert 。。。select （原子性）
+
+显式手动加解锁
+
+
+<百万以上数据查询>
+1、合理设置联合索引，覆盖索引，不单独设置索引
+2、索引过多会导致插入和更新缓慢，但是不设置索引，删除也会很慢
+3、百万以上数据，从头分页没有性能问题，从后面开始分页则会导致很慢，可以使用 子查询先查询所有符合条件的ID，where in （ids）,走常量const索引
+select * from t_keyword_m where id in (
+  select aa.id from (select bb.id from t_keyword_m bb limit 20000,100) aa
+) limit 100
+
+
+
+
+【mysql  my.ini配置文件】
+
+[mysqld]
+# 设置服务连接的端口(默认3306)
+port=5306
+# 设置mysql的安装目录
+basedir=E:\\soft-install\\mysql-8.0.25-winx64\\
+# 设置mysql数据库的数据的存放目录
+datadir=E:\\soft-install\\mysql-8.0.25-winx64\\data
+# 允许最大连接数
+max_connections=200
+# 允许连接失败的次数。这是为了防止有人从该主机试图攻击数据库系统
+max_connect_errors=10
+# 服务端使用的字符集默认为UTF8
+character-set-server=UTF8MB4
+# 创建新表时将使用的默认存储引擎
+default-storage-engine=INNODB
+# 默认使用“mysql_native_password”插件认证
+default_authentication_plugin=mysql_native_password
+ 
+bind-address = 127.0.0.1 
+
+#开启慢查询
+slow_query_log=ON
+#慢查询范围：超过5秒
+long_query_time=5
+#保存慢查询日志文件位置
+slow_query_log_file=E:\\soft-install\\mysql-8.0.25-winx64\\data\\master-slow_sql.log
+
+[mysql]
+# 设置mysql客户端默认字符集
+default-character-set=utf8
+
+
+[client]
+# 设置mysql客户端连接服务端时默认使用的端口
+# port=5306
+default-character-set=utf8
+
+user=root
+
+# 初始化时mysqld --initialize-insecure  --console 还是赋值了空密码给root账户
+# password=root

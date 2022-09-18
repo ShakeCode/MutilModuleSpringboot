@@ -1,0 +1,159 @@
+表结构：
+
+CREATE TABLE `t_grid_m` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '名称',
+  `level` int DEFAULT NULL COMMENT '层级',
+  `parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级编码',
+  `all_parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级全路径编码',
+  `create_user` varchar(50) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
+  `create_date` datetime DEFAULT NULL COMMENT '创建时间',
+  `modify_user` varchar(50) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '修改人',
+  `modify_date` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='区域信息表';
+
+
+样例数据：
+
+INSERT INTO `promotion`.`t_grid_m` (`id`, `code`, `name`, `level`, `parent_code`, `all_parent_code`, `create_user`, `create_date`, `modify_user`, `modify_date`) VALUES ('1', 'GD', '广东', '1', '-1', '-1,GD', 'system', '2022-09-18 13:15:35', 'system', '2022-09-18 13:15:35');
+INSERT INTO `promotion`.`t_grid_m` (`id`, `code`, `name`, `level`, `parent_code`, `all_parent_code`, `create_user`, `create_date`, `modify_user`, `modify_date`) VALUES ('2', 'DG', '东莞', '2', 'GD', '-1,GD,DG', 'system', '2022-09-18 13:15:35', 'system', '2022-09-18 13:15:35');
+INSERT INTO `promotion`.`t_grid_m` (`id`, `code`, `name`, `level`, `parent_code`, `all_parent_code`, `create_user`, `create_date`, `modify_user`, `modify_date`) VALUES ('3', 'DG06', '东莞东部分公司', '3', 'DG', '-1,GD,DG,DG06', 'system', '2022-09-18 13:15:35', 'system', '2022-09-18 13:15:35');
+INSERT INTO `promotion`.`t_grid_m` (`id`, `code`, `name`, `level`, `parent_code`, `all_parent_code`, `create_user`, `create_date`, `modify_user`, `modify_date`) VALUES ('4', 'DG0602', '大朗', '4', 'DG06', '-1,GD,DG,DG06,DG0602', 'system', '2022-09-18 13:15:35', 'system', '2022-09-18 13:15:35');
+INSERT INTO `promotion`.`t_grid_m` (`id`, `code`, `name`, `level`, `parent_code`, `all_parent_code`, `create_user`, `create_date`, `modify_user`, `modify_date`) VALUES ('5', 'DG060201', '大朗责任田', '5', 'DG0602', '-1,GD,DG,DG06,DG0602,DG060201', 'system', '2022-09-18 13:15:35', 'system', '2022-09-18 13:15:35');
+INSERT INTO `promotion`.`t_grid_m` (`id`, `code`, `name`, `level`, `parent_code`, `all_parent_code`, `create_user`, `create_date`, `modify_user`, `modify_date`) VALUES ('6', 'GZ', '广州', '2', 'GD', '-1,GD,GZ', 'system', '2022-09-18 13:15:35', 'system', '2022-09-18 13:15:35');
+INSERT INTO `promotion`.`t_grid_m` (`id`, `code`, `name`, `level`, `parent_code`, `all_parent_code`, `create_user`, `create_date`, `modify_user`, `modify_date`) VALUES ('7', 'GZ06', '广州东部分公司', '3', 'GZ', '-1,GD,GZ,GZ06', 'system', '2022-09-18 13:15:35', 'system', '2022-09-18 13:15:35');
+INSERT INTO `promotion`.`t_grid_m` (`id`, `code`, `name`, `level`, `parent_code`, `all_parent_code`, `create_user`, `create_date`, `modify_user`, `modify_date`) VALUES ('8', 'GZ0602', '天河', '4', 'GZ06', '-1,GD,GZ,GZ06,GZ0602', 'system', '2022-09-18 13:15:35', 'system', '2022-09-18 13:15:35');
+INSERT INTO `promotion`.`t_grid_m` (`id`, `code`, `name`, `level`, `parent_code`, `all_parent_code`, `create_user`, `create_date`, `modify_user`, `modify_date`) VALUES ('9', 'GZ060201', '天河责任田', '5', 'GZ0602', '-1,GD,GZ,GZ06,GZ0602,GZ060201', 'system', '2022-09-18 13:15:35', 'system', '2022-09-18 13:15:35');
+
+
+递归查询：
+
+set @grid_code :='DG0602';
+set @level_num :=5;
+
+SELECT 
+id,temCode, parent_code, level+1 as level
+FROM ( 
+    SELECT 
+        @code AS temCode, 
+        (SELECT @code := parent_code FROM t_grid_m WHERE code = temCode) AS parent_code, 
+         @level :=  @level -1 AS  level,
+         @id :=  @id +1 AS  id
+    FROM 
+        (SELECT @code :=@grid_code ,  @level :=@level_num, @id := 0) vars, 
+        t_grid_m h 
+    WHERE level >= 0
+) 
+T1 
+where level>=0
+order by level desc;
+
+结果：
+id,temCode, parent_code, level
+1	DG0602	DG06		5
+2	DG06	DG			4
+3	DG		GD			3
+4	GD		-1			2
+5	-1					1
+------------------------------------------------------------------------------------------------------
+drop PROCEDURE  if exists split_grid_code;
+CREATE  PROCEDURE `split_grid_code`()
+BEGIN
+
+
+declare tem_code VARCHAR(50);
+declare tem_name VARCHAR(50);
+declare tem_level VARCHAR(50);
+declare tem_parent_code VARCHAR(50);
+declare tem_all_parent_code VARCHAR(50);
+
+DECLARE done INT DEFAULT FALSE;
+
+-- 声明游标
+DECLARE cusr CURSOR FOR select code, name, level, parent_code, all_parent_code from tmp_grid_m where level ;
+
+-- 声明游标停止事件标识
+DECLARE
+    CONTINUE HANDLER FOR NOT FOUND
+SET
+    done = TRUE;
+
+
+
+#区域信息临时表
+drop temporary table if exists tmp_grid_m;
+create temporary table tmp_grid_m(
+ `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '名称',
+  `level` int DEFAULT NULL COMMENT '层级',
+  `parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级编码',
+  `all_parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级全路径编码'
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='区域信息临时表';
+
+-- 同步区域数据
+insert into tmp_grid_m select code,name, level, parent_code,  all_parent_code from t_grid_m; 
+
+select * from tmp_grid_m;
+
+#区域转换结果信息临时表, 取出地市和区县编码为横表字段
+drop temporary table if exists grid_result_m;
+create temporary table grid_result_m(
+  `city_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '地市编码',
+  `district_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '区县编码',
+	`grid_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
+	`name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '编码',
+	`level` int(11) DEFAULT NULL COMMENT '层级',
+  `parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级编码',
+  `all_parent_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '父级全路径编码'
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='区域转换结果信息临时表';
+
+-- 打开游标
+open cusr;
+	grid_loop: loop
+    FETCH cusr INTO tem_code,tem_name,tem_level,tem_parent_code,tem_all_parent_code;
+		if done then 
+			leave grid_loop;
+		end if;
+		-- 插入基础数据
+		insert into grid_result_m(grid_code,name,level,parent_code, all_parent_code) values(tem_code,tem_name,tem_level, tem_parent_code, tem_all_parent_code);
+
+
+		# 转换地市编码,转换区县编码
+
+		set @grid_code :=tem_code;
+		set @level_num :=tem_level;
+
+		update grid_result_m bb,
+		(
+		SELECT 
+		id,temCode, parent_code, level+1 as fianl_level
+		FROM ( 
+				SELECT 
+						@code AS temCode, 
+						(SELECT @code := parent_code FROM t_grid_m WHERE code = temCode) AS parent_code, 
+						 @level :=  @level -1 AS  level,
+						 @id :=  @id +1 AS  id
+				FROM 
+						(SELECT @code :=@grid_code ,  @level :=@level_num, @id := 0) vars, 
+						t_grid_m h 
+				WHERE level >= 0
+		) 
+		T1 
+		where level = 2
+		) aa set bb.district_code= aa.temCode , bb.city_code = aa.parent_code where bb.grid_code=@grid_code;
+
+	end loop;
+
+-- 关闭游标
+close cusr;
+
+select * from grid_result_m;
+
+drop temporary table if exists tmp_grid_m;
+drop temporary table if exists grid_result_m;
+ 
+END
+
+-----------------------------------------------------------------------------------
