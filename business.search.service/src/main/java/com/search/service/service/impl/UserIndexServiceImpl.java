@@ -22,7 +22,11 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -40,6 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * The type User index service.
+ */
 @Service
 public class UserIndexServiceImpl implements UserIndexService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserIndexServiceImpl.class);
@@ -48,6 +55,10 @@ public class UserIndexServiceImpl implements UserIndexService {
 
     private final RestHighLevelClient restHighLevelClient;
 
+    /**
+     * Instantiates a new User index service.
+     * @param restHighLevelClient the rest high level client
+     */
     public UserIndexServiceImpl(RestHighLevelClient restHighLevelClient) {
         this.restHighLevelClient = restHighLevelClient;
     }
@@ -180,6 +191,37 @@ public class UserIndexServiceImpl implements UserIndexService {
         writeTotal(searchRequest, hits);
         SearchHit[] hitsArr = hits.getHits();
         return dealResultList(hitsArr);
+    }
+
+    @Override
+    public void deleteByQuery(String index, QueryBuilder queryBuilder) throws IOException {
+        // 在一组索引上创建DeleteByQueryRequest
+        DeleteByQueryRequest request = new DeleteByQueryRequest(index, "source2");
+        //设置版本冲突时继续
+        request.setConflicts("proceed");
+        // request.setQuery(new TermQueryBuilder("userId", "kimchy"));
+        request.setQuery(queryBuilder);
+        request.setBatchSize(10000);
+        BulkByScrollResponse response = restHighLevelClient.deleteByQuery(request, RequestOptions.DEFAULT);
+        LOGGER.info("deleteByQuery waste:{}", response.getTook());
+    }
+
+    /**
+     * Update by query bulk by scroll response.
+     * @param index        the index
+     * @param queryBuilder the query builder
+     * @return the bulk by scroll response
+     * @throws IOException the io exception
+     */
+    @Override
+    public BulkByScrollResponse updateByQuery(String index, QueryBuilder queryBuilder) throws IOException {
+        UpdateByQueryRequest request = new UpdateByQueryRequest(index);
+        //设置版本冲突时继续
+        request.setConflicts("proceed");
+        request.setQuery(queryBuilder);
+        BulkByScrollResponse updateResponse = restHighLevelClient.updateByQuery(request, RequestOptions.DEFAULT);
+        LOGGER.info("update by query result: {},status:{}", JSON.toJSONString(updateResponse), updateResponse.getStatus());
+        return updateResponse;
     }
 
     private List<Map<String, Object>> dealResultList(SearchHit[] hitsArr) {
